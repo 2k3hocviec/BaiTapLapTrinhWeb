@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express App - Forms</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 900px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+        }
+
+        .form-container h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            color: #555;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            min-height: 100px;
+            overflow-y: auto;
+        }
+
+        .response.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .response.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .response pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        #form1Title,
+        #form2Title {
+            color: #667eea;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- FORM 1 -->
+        <div class="form-container">
+            <h2><span id="form1Title">FORM 1</span> - Kiểm tra thông tin</h2>
+            <form id="form1" onsubmit="handleForm1(event)">
+                <div class="form-group">
+                    <label for="name1">Tên</label>
+                    <input type="text" id="name1" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="age1">Tuổi</label>
+                    <input type="number" id="age1" name="age" required>
+                </div>
+                <button type="submit">GET /api/info</button>
+            </form>
+            <div id="response1" class="response"></div>
+        </div>
+
+        <!-- FORM 2 -->
+        <div class="form-container">
+            <h2><span id="form2Title">FORM 2</span> - Đăng ký</h2>
+            <form id="form2" onsubmit="handleForm2(event)">
+                <div class="form-group">
+                    <label for="name2">Tên</label>
+                    <input type="text" id="name2" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="age2">Tuổi</label>
+                    <input type="number" id="age2" name="age" required>
+                </div>
+                <div class="form-group">
+                    <label for="email2">Email</label>
+                    <input type="email" id="email2" name="email" required>
+                </div>
+                <button type="submit">POST /api/register</button>
+            </form>
+            <div id="response2" class="response"></div>
+        </div>
+    </div>
+
+    <script>
+        // FORM 1 - GET /api/info
+        async function handleForm1(event) {
+            event.preventDefault();
+            const name = document.getElementById('name1').value;
+            const age = document.getElementById('age1').value;
+
+            try {
+                const res = await fetch(`/api/info?name=${encodeURIComponent(name)}&age=${age}`);
+                const data = await res.json();
+
+                const responseDiv = document.getElementById('response1');
+                if (data.success) {
+                    responseDiv.className = 'response success';
+                    responseDiv.innerHTML = `<strong>✓ Thành công:</strong><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.innerHTML = `<strong>✗ Lỗi:</strong><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                const responseDiv = document.getElementById('response1');
+                responseDiv.className = 'response error';
+                responseDiv.innerHTML = `<strong>✗ Lỗi request:</strong><pre>${error.message}</pre>`;
+            }
+        }
+
+        // FORM 2 - POST /api/register
+        async function handleForm2(event) {
+            event.preventDefault();
+            const name = document.getElementById('name2').value;
+            const age = document.getElementById('age2').value;
+            const email = document.getElementById('email2').value;
+
+            try {
+                const res = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, age, email })
+                });
+                const data = await res.json();
+
+                const responseDiv = document.getElementById('response2');
+                if (data.success) {
+                    responseDiv.className = 'response success';
+                    responseDiv.innerHTML = `<strong>✓ Đăng ký thành công:</strong><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    document.getElementById('form2').reset();
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.innerHTML = `<strong>✗ Lỗi:</strong><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                const responseDiv = document.getElementById('response2');
+                responseDiv.className = 'response error';
+                responseDiv.innerHTML = `<strong>✗ Lỗi request:</strong><pre>${error.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+
+</html>
